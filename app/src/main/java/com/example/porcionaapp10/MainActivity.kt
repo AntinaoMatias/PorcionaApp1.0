@@ -357,7 +357,7 @@ fun RecipeDetailScreen(recipe: Receta, navController: NavController) {
                     fontSize = 24.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Text("Ingredientes", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
+                Text("Ingredientes (${recipe.personCount} personas)", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
                 recipe.ingredientes.forEach { ingrediente ->
                     val text = when {
                         ingrediente.cantidad == null || ingrediente.cantidad == "0" || ingrediente.tipoUnidad == null || listOf("pizca", "chorrito").any { it in ingrediente.nombre.lowercase() } -> ingrediente.nombre
