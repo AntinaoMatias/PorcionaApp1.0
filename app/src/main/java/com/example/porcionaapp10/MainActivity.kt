@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -198,7 +197,7 @@ fun HomeScreen(navController: NavController, recipes: List<Receta>) {
                 // --- Tus Recetas Section ---
                 Text("Tus Recetas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
-                Column(modifier = Modifier.heightIn(max = 400.dp)) {
+                Column {
                     recipes.forEach { receta ->
                         TusRecetasCard(receta = receta, navController = navController)
                     }
@@ -216,19 +215,6 @@ fun HomeScreen(navController: NavController, recipes: List<Receta>) {
                     Icon(Icons.Filled.Restaurant, contentDescription = "Crear Receta")
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("CREAR RECETA", fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // --- Recetas Precargadas Section ---
-                Text("Recetas Precargadas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(recipes.drop(2)) { receta ->
-                        PrecargadasRecetaCard(receta = receta, navController = navController)
-                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -249,13 +235,32 @@ fun TusRecetasCard(receta: Receta, navController: NavController) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = receta.imageUrl,
-                contentDescription = receta.nombreReceta,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.size(64.dp).clip(CircleShape),
-                placeholder = painterResource(id = R.drawable.ic_launcher_background)
-            )
+            if (receta.imageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = receta.imageUrl,
+                    contentDescription = receta.nombreReceta,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_background)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Restaurant,
+                        contentDescription = "Sin imagen",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(receta.nombreReceta, fontWeight = FontWeight.Bold, fontSize = 18.sp)
@@ -263,40 +268,6 @@ fun TusRecetasCard(receta: Receta, navController: NavController) {
                     receta.ingredientes.take(4).joinToString(", ") { it.nombre } + "...",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun PrecargadasRecetaCard(receta: Receta, navController: NavController) {
-    Card(
-        modifier = Modifier
-            .width(150.dp)
-            .clickable { navController.navigate("recipeDetail/${receta.nombreReceta}") },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column {
-            AsyncImage(
-                model = receta.imageUrl,
-                contentDescription = receta.nombreReceta,
-                modifier = Modifier.height(100.dp).fillMaxWidth(),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.ic_launcher_background)
-            )
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(
-                    text = receta.nombreReceta,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = receta.ingredientes.take(4).joinToString(", ") { it.nombre } + "...",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    maxLines = 2
                 )
             }
         }
@@ -326,13 +297,29 @@ fun RecipeDetailScreen(recipe: Receta, navController: NavController) {
                 .verticalScroll(rememberScrollState())
         ) {
             Box(modifier = Modifier.height(300.dp)) {
-                AsyncImage(
-                    model = recipe.imageUrl,
-                    contentDescription = recipe.nombreReceta,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    placeholder = painterResource(id = R.drawable.ic_launcher_background)
-                )
+                if (recipe.imageUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = recipe.imageUrl,
+                        contentDescription = recipe.nombreReceta,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                        placeholder = painterResource(id = R.drawable.ic_launcher_background)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Restaurant,
+                            contentDescription = "Sin imagen",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween

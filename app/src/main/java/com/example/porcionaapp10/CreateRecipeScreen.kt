@@ -52,12 +52,13 @@ fun CreateRecipeScreen(navController: NavController, onRecipeCreated: (Receta) -
         TipoUnidad.GRAMOS to "gr",
         TipoUnidad.UNIDAD to "ud",
         TipoUnidad.KILOGRAMOS to "kg",
-        TipoUnidad.CUCHARADITAS to "cdta",
+        TipoUnidad.CUCHARADITAS to "cditas",
         TipoUnidad.CUCHARADAS to "cda",
         TipoUnidad.MILILITROS to "ml",
-        TipoUnidad.LITROS to "l",
-        TipoUnidad.TAZAS to "tza",
-        TipoUnidad.ONZAS to "oz"
+        TipoUnidad.LITROS to "lt",
+        TipoUnidad.TAZAS to "tazas",
+        TipoUnidad.ONZAS to "oz",
+        TipoUnidad.PIZCA to "pizca"
     )
 
     Scaffold(
@@ -244,12 +245,13 @@ fun TipoUnidadDropDown(
         TipoUnidad.GRAMOS to "gr",
         TipoUnidad.UNIDAD to "ud",
         TipoUnidad.KILOGRAMOS to "kg",
-        TipoUnidad.CUCHARADITAS to "cdta",
+        TipoUnidad.CUCHARADITAS to "cditas",
         TipoUnidad.CUCHARADAS to "cda",
         TipoUnidad.MILILITROS to "ml",
-        TipoUnidad.LITROS to "l",
-        TipoUnidad.TAZAS to "tza",
-        TipoUnidad.ONZAS to "oz"
+        TipoUnidad.LITROS to "lt",
+        TipoUnidad.TAZAS to "tazas",
+        TipoUnidad.ONZAS to "oz",
+        TipoUnidad.PIZCA to "pizca"
     )
 
     ExposedDropdownMenuBox(
