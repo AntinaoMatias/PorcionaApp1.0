@@ -9,7 +9,8 @@ enum class TipoUnidad {
     MILILITROS,
     LITROS,
     TAZAS,
-    ONZAS
+    ONZAS,
+    PIZCA
 }
 
 data class Ingrediente(
