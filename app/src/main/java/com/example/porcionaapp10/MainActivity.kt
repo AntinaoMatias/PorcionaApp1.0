@@ -4,19 +4,21 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,14 +42,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PorcionaApp10Theme {
-                AppContent()
+                AppContent(mockRecipes = mockRecipes)
             }
         }
     }
 }
 
 // --- Mock Data ---
-val mockRecipes = listOf(
+val mockRecipes = mutableStateListOf(
     Receta(
         nombreReceta = "Lasaña Clásica",
         ingredientes = listOf(
@@ -67,7 +69,8 @@ val mockRecipes = listOf(
             "Paso 7: Termina con una capa de salsa, cubre con Queso Mozzarella y Parmesano.",
             "Paso 8: Hornea cubierto con papel aluminio por 20 minutos. Retira el aluminio y hornea 10-15 minutos más hasta gratinar. Deja reposar 10-15 minutos antes de servir."
         ).joinToString("\n"),
-        imageUrl = "https://source.unsplash.com/random/800x600?lasagna"
+        imageUrl = "https://source.unsplash.com/random/800x600?lasagna",
+        personCount = 4
     ),
     Receta(
         nombreReceta = "Tiramisú",
@@ -86,7 +89,8 @@ val mockRecipes = listOf(
             "Paso 7: Cubre el molde y refrigera por un mínimo de 6 horas o toda la noche para que se asienten los sabores.",
             "Paso 8: Justo antes de servir, espolvorea generosamente con el cacao en polvo usando un colador."
         ).joinToString("\n"),
-        imageUrl = "https://source.unsplash.com/random/800x600?tiramisu"
+        imageUrl = "https://source.unsplash.com/random/800x600?tiramisu",
+        personCount = 6
     ),
     Receta(
         nombreReceta = "Guacamole Fresco",
@@ -96,38 +100,42 @@ val mockRecipes = listOf(
             Ingrediente(null, null, "pizca de sal")
         ),
         instrucciones = "Machacar los aguacates en un tazón. Picar finamente la cebolla y el tomate e incorporarlos...",
-        imageUrl = "https://source.unsplash.com/random/800x600?guacamole"
+        imageUrl = "https://source.unsplash.com/random/800x600?guacamole",
+        personCount = 4
     ),
     Receta(
         nombreReceta = "Sopa de Lentejas",
         ingredientes = listOf(
             Ingrediente("200", TipoUnidad.GRAMOS, "lentejas"),
-            Ingrediente("1", TipoUnidad.MILILITROS, "agua"),
+            Ingrediente("1", TipoUnidad.LITROS, "agua"),
             Ingrediente(null, null, "trozo de chorizo")
         ),
         instrucciones = "Lavar las lentejas y colocarlas en una olla. Añadir el agua y la zanahoria...",
-        imageUrl = "https://source.unsplash.com/random/800x600?lentil-soup"
+        imageUrl = "https://source.unsplash.com/random/800x600?lentil-soup",
+        personCount = 4
     ),
     Receta(
         nombreReceta = "Pollo Asado",
         ingredientes = listOf(Ingrediente("1", TipoUnidad.UNIDAD, "pollo entero"), Ingrediente(null, null, "sal y pimienta")),
         instrucciones = "Salpimentar el pollo por dentro y por fuera. Hornear a 200°C por 1 hora.",
-        imageUrl = "https://source.unsplash.com/random/800x600?roast-chicken"
+        imageUrl = "https://source.unsplash.com/random/800x600?roast-chicken",
+        personCount = 4
     ),
     Receta(
         nombreReceta = "Ramen Casero",
         ingredientes = listOf(Ingrediente("500", TipoUnidad.MILILITROS, "caldo de pollo"), Ingrediente("100", TipoUnidad.GRAMOS, "fideos para ramen")),
         instrucciones = "Hervir el caldo, añadir los fideos y cocinar por 3 minutos. Servir con tus toppings favoritos.",
-        imageUrl = "https://source.unsplash.com/random/800x600?ramen"
+        imageUrl = "https://source.unsplash.com/random/800x600?ramen",
+        personCount = 2
     )
 )
 
 @Composable
-fun AppContent() {
+fun AppContent(mockRecipes: SnapshotStateList<Receta>) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, recipes = mockRecipes)
         }
         composable("recipeDetail/{recipeName}") { backStackEntry ->
             val recipeName = backStackEntry.arguments?.getString("recipeName")
@@ -136,12 +144,18 @@ fun AppContent() {
                 RecipeDetailScreen(recipe = recipe, navController = navController)
             }
         }
+        composable("createRecipe") {
+            CreateRecipeScreen(navController = navController) { recipe ->
+                mockRecipes.add(recipe)
+                navController.popBackStack()
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, recipes: List<Receta>) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -151,11 +165,11 @@ fun HomeScreen(navController: NavController) {
         drawerContent = {
             ModalDrawerSheet {
                 Text("Menú", modifier = Modifier.padding(16.dp), fontSize = 24.sp)
-                Divider()
+                HorizontalDivider()
                 NavigationDrawerItem(label = { Text("Recetas Propias") }, selected = false, onClick = { Toast.makeText(context, "Recetas Propias", Toast.LENGTH_SHORT).show() })
                 NavigationDrawerItem(label = { Text("Recetas Precargadas") }, selected = false, onClick = { Toast.makeText(context, "Recetas Precargadas", Toast.LENGTH_SHORT).show() })
                 NavigationDrawerItem(label = { Text("Ayuda") }, selected = false, onClick = { Toast.makeText(context, "Ayuda", Toast.LENGTH_SHORT).show() })
-                Divider()
+                HorizontalDivider()
                 NavigationDrawerItem(label = { Text("Cerrar App") }, selected = false, onClick = { Toast.makeText(context, "Cerrar App", Toast.LENGTH_SHORT).show() })
             }
         }
@@ -185,7 +199,7 @@ fun HomeScreen(navController: NavController) {
                 Text("Tus Recetas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(modifier = Modifier.heightIn(max = 400.dp)) {
-                    mockRecipes.take(2).forEach { receta ->
+                    recipes.take(2).forEach { receta ->
                         TusRecetasCard(receta = receta, navController = navController)
                     }
                 }
@@ -194,12 +208,12 @@ fun HomeScreen(navController: NavController) {
 
                 // --- Crear Receta Button ---
                 Button(
-                    onClick = { Toast.makeText(context, "Botón 'Crear Receta' presionado", Toast.LENGTH_SHORT).show() },
+                    onClick = { navController.navigate("createRecipe") },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
                 ) {
-                    Icon(Icons.Default.Restaurant, contentDescription = "Crear Receta")
+                    Icon(Icons.Filled.Restaurant, contentDescription = "Crear Receta")
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("CREAR RECETA", fontWeight = FontWeight.Bold)
                 }
@@ -212,7 +226,7 @@ fun HomeScreen(navController: NavController) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(mockRecipes.drop(2)) { receta ->
+                    items(recipes.drop(2)) { receta ->
                         PrecargadasRecetaCard(receta = receta, navController = navController)
                     }
                 }
@@ -299,7 +313,7 @@ fun RecipeDetailScreen(recipe: Receta, navController: NavController) {
                 onClick = { Toast.makeText(context, "Navegar a Porcionar Receta", Toast.LENGTH_SHORT).show() },
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
-                Icon(Icons.Default.Restaurant, contentDescription = "Porcionar")
+                Icon(Icons.Filled.Restaurant, contentDescription = "Porcionar")
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("PORCIONAR RECETA")
             }
@@ -325,7 +339,7 @@ fun RecipeDetailScreen(recipe: Receta, navController: NavController) {
                 ) {
                     Card(shape = CircleShape, elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                     Card(shape = CircleShape, elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {

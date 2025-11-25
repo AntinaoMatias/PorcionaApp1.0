@@ -12,10 +12,19 @@ enum class TipoUnidad {
     ONZAS
 }
 
+data class Ingrediente(
+    val cantidad: String?,
+    val tipoUnidad: TipoUnidad?,
+    val nombre: String,
+) {
+    val isContable: Boolean
+        get() = tipoUnidad == TipoUnidad.UNIDAD
+}
+
 data class Receta(
-    val nombre_receta: String,
-    val tipo_unidad: List<TipoUnidad>,
-    val ingredientes: String,
+    val nombreReceta: String,
+    val ingredientes: List<Ingrediente>,
     val instrucciones: String,
-    val image_url: String
+    val imageUrl: String,
+    val personCount: Int
 )
