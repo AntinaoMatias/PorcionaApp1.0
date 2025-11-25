@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,14 +41,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PorcionaApp10Theme {
-                AppContent(mockRecipes = mockRecipes)
+                AppContent()
             }
         }
     }
 }
 
-// --- Mock Data ---
-val mockRecipes = mutableStateListOf(
+// --- Mock Data ------
+val mockRecipes = listOf(
     Receta(
         nombreReceta = "Lasaña Clásica",
         ingredientes = listOf(
@@ -69,8 +68,7 @@ val mockRecipes = mutableStateListOf(
             "Paso 7: Termina con una capa de salsa, cubre con Queso Mozzarella y Parmesano.",
             "Paso 8: Hornea cubierto con papel aluminio por 20 minutos. Retira el aluminio y hornea 10-15 minutos más hasta gratinar. Deja reposar 10-15 minutos antes de servir."
         ).joinToString("\n"),
-        imageUrl = "https://source.unsplash.com/random/800x600?lasagna",
-        personCount = 4
+        imageUrl = "https://source.unsplash.com/random/800x600?lasagna"
     ),
     Receta(
         nombreReceta = "Tiramisú",
@@ -89,8 +87,7 @@ val mockRecipes = mutableStateListOf(
             "Paso 7: Cubre el molde y refrigera por un mínimo de 6 horas o toda la noche para que se asienten los sabores.",
             "Paso 8: Justo antes de servir, espolvorea generosamente con el cacao en polvo usando un colador."
         ).joinToString("\n"),
-        imageUrl = "https://source.unsplash.com/random/800x600?tiramisu",
-        personCount = 6
+        imageUrl = "https://source.unsplash.com/random/800x600?tiramisu"
     ),
     Receta(
         nombreReceta = "Guacamole Fresco",
@@ -100,8 +97,7 @@ val mockRecipes = mutableStateListOf(
             Ingrediente(null, null, "pizca de sal")
         ),
         instrucciones = "Machacar los aguacates en un tazón. Picar finamente la cebolla y el tomate e incorporarlos...",
-        imageUrl = "https://source.unsplash.com/random/800x600?guacamole",
-        personCount = 4
+        imageUrl = "https://source.unsplash.com/random/800x600?guacamole"
     ),
     Receta(
         nombreReceta = "Sopa de Lentejas",
@@ -111,31 +107,28 @@ val mockRecipes = mutableStateListOf(
             Ingrediente(null, null, "trozo de chorizo")
         ),
         instrucciones = "Lavar las lentejas y colocarlas en una olla. Añadir el agua y la zanahoria...",
-        imageUrl = "https://source.unsplash.com/random/800x600?lentil-soup",
-        personCount = 4
+        imageUrl = "https://source.unsplash.com/random/800x600?lentil-soup"
     ),
     Receta(
         nombreReceta = "Pollo Asado",
         ingredientes = listOf(Ingrediente("1", TipoUnidad.UNIDAD, "pollo entero"), Ingrediente(null, null, "sal y pimienta")),
         instrucciones = "Salpimentar el pollo por dentro y por fuera. Hornear a 200°C por 1 hora.",
-        imageUrl = "https://source.unsplash.com/random/800x600?roast-chicken",
-        personCount = 4
+        imageUrl = "https://source.unsplash.com/random/800x600?roast-chicken"
     ),
     Receta(
         nombreReceta = "Ramen Casero",
         ingredientes = listOf(Ingrediente("500", TipoUnidad.MILILITROS, "caldo de pollo"), Ingrediente("100", TipoUnidad.GRAMOS, "fideos para ramen")),
         instrucciones = "Hervir el caldo, añadir los fideos y cocinar por 3 minutos. Servir con tus toppings favoritos.",
-        imageUrl = "https://source.unsplash.com/random/800x600?ramen",
-        personCount = 2
+        imageUrl = "https://source.unsplash.com/random/800x600?ramen"
     )
 )
 
 @Composable
-fun AppContent(mockRecipes: SnapshotStateList<Receta>) {
+fun AppContent() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
-            HomeScreen(navController = navController, recipes = mockRecipes)
+            HomeScreen(navController = navController)
         }
         composable("recipeDetail/{recipeName}") { backStackEntry ->
             val recipeName = backStackEntry.arguments?.getString("recipeName")
@@ -145,17 +138,14 @@ fun AppContent(mockRecipes: SnapshotStateList<Receta>) {
             }
         }
         composable("createRecipe") {
-            CreateRecipeScreen(navController = navController) { recipe ->
-                mockRecipes.add(recipe)
-                navController.popBackStack()
-            }
+            CreateRecipeScreen(navController = navController)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, recipes: List<Receta>) {
+fun HomeScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -199,7 +189,7 @@ fun HomeScreen(navController: NavController, recipes: List<Receta>) {
                 Text("Tus Recetas", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(modifier = Modifier.heightIn(max = 400.dp)) {
-                    recipes.take(2).forEach { receta ->
+                    mockRecipes.take(2).forEach { receta ->
                         TusRecetasCard(receta = receta, navController = navController)
                     }
                 }
@@ -226,7 +216,7 @@ fun HomeScreen(navController: NavController, recipes: List<Receta>) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(recipes.drop(2)) { receta ->
+                    items(mockRecipes.drop(2)) { receta ->
                         PrecargadasRecetaCard(receta = receta, navController = navController)
                     }
                 }
@@ -357,7 +347,7 @@ fun RecipeDetailScreen(recipe: Receta, navController: NavController) {
                     fontSize = 24.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Text("Ingredientes (${recipe.personCount} personas)", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
+                Text("Ingredientes", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
                 recipe.ingredientes.forEach { ingrediente ->
                     val text = when {
                         ingrediente.cantidad == null || ingrediente.cantidad == "0" || ingrediente.tipoUnidad == null || listOf("pizca", "chorrito").any { it in ingrediente.nombre.lowercase() } -> ingrediente.nombre
