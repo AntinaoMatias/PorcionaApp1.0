@@ -28,6 +28,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 
+private val abbreviations = mapOf(
+    TipoUnidad.GRAMOS to "gr",
+    TipoUnidad.UNIDAD to "ud",
+    TipoUnidad.KILOGRAMOS to "kg",
+    TipoUnidad.CUCHARADITAS to "cdta",
+    TipoUnidad.CUCHARADAS to "cda",
+    TipoUnidad.MILILITROS to "ml",
+    TipoUnidad.LITROS to "l",
+    TipoUnidad.TAZAS to "tza",
+    TipoUnidad.ONZAS to "oz",
+    TipoUnidad.PIZCA to "pzc"
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateRecipeScreen(navController: NavController, onRecipeCreated: (Receta) -> Unit) {
@@ -46,19 +59,6 @@ fun CreateRecipeScreen(navController: NavController, onRecipeCreated: (Receta) -
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? -> imageUri = uri }
-    )
-
-    val abbreviations = mapOf(
-        TipoUnidad.GRAMOS to "gr",
-        TipoUnidad.UNIDAD to "ud",
-        TipoUnidad.KILOGRAMOS to "kg",
-        TipoUnidad.CUCHARADITAS to "cditas",
-        TipoUnidad.CUCHARADAS to "cda",
-        TipoUnidad.MILILITROS to "ml",
-        TipoUnidad.LITROS to "lt",
-        TipoUnidad.TAZAS to "tazas",
-        TipoUnidad.ONZAS to "oz",
-        TipoUnidad.PIZCA to "pizca"
     )
 
     Scaffold(
@@ -125,7 +125,9 @@ fun CreateRecipeScreen(navController: NavController, onRecipeCreated: (Receta) -
                                 imageVector = Icons.Default.PhotoCamera,
                                 contentDescription = "Agregar imagen",
                                 tint = Color.Gray,
-                                modifier = Modifier.size(50.dp).align(Alignment.Center)
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .align(Alignment.Center)
                             )
                         }
                     }
@@ -241,18 +243,6 @@ fun TipoUnidadDropDown(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val abbreviations = mapOf(
-        TipoUnidad.GRAMOS to "gr",
-        TipoUnidad.UNIDAD to "ud",
-        TipoUnidad.KILOGRAMOS to "kg",
-        TipoUnidad.CUCHARADITAS to "cditas",
-        TipoUnidad.CUCHARADAS to "cda",
-        TipoUnidad.MILILITROS to "ml",
-        TipoUnidad.LITROS to "lt",
-        TipoUnidad.TAZAS to "tazas",
-        TipoUnidad.ONZAS to "oz",
-        TipoUnidad.PIZCA to "pizca"
-    )
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -260,15 +250,15 @@ fun TipoUnidadDropDown(
         modifier = modifier
     ) {
         OutlinedTextField(
+            modifier = Modifier.menuAnchor(),
             value = abbreviations[selectedTipoUnidad] ?: "Uni.",
             onValueChange = {},
             readOnly = true,
             label = { Text("Uni.") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            TipoUnidad.values().forEach { tipoUnidad ->
+            TipoUnidad.entries.forEach { tipoUnidad ->
                 DropdownMenuItem(
                     text = { Text(abbreviations[tipoUnidad] ?: tipoUnidad.name) },
                     onClick = {
